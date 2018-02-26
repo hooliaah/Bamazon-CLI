@@ -1,3 +1,5 @@
+-- MySql database schema
+
 DROP DATABASE IF EXISTS bamazonDB;
 
 CREATE DATABASE bamazonDB;
