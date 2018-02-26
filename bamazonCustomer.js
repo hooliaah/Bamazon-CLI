@@ -13,8 +13,8 @@ var connection = mysql.createConnection({
     port: 3306,
 
     // enter your username and password
-    user: '********',
-    password: '********',
+    user: '****',
+    password: '****',
 
     database: 'bamazonDB'
 });
@@ -54,7 +54,7 @@ function whatToBuy() {
             message: "Enter the Item ID of the item would you like to purchase",
             validate: function (input) {
                 if (isNaN(input)) {
-                    return  "Enter the product number";
+                    return "Enter the product number";
                 } else {
                     return true;
                 }
@@ -105,7 +105,22 @@ function updateQuantity() {
         ],
         function (err, res) {
             if (err) throw err;
-            showProductList();
+            updateProductSale();
         })
 };
-//   connection.end();
+// function update product sales
+function updateProductSale() {
+    connection.query("SELECT price, item_id FROM products WHERE item_id =?", [itemToBuy], function (err, res) {
+        if (err) throw err;
+        connection.query("UPDATE products SET product_sales=product_sales + ? WHERE item_id=?",
+            [
+                (parseFloat(res[0].price) * quantityToBuy),
+                itemToBuy
+            ],
+            function (err, res) {
+                if (err) throw err;
+                showProductList();
+            })
+    }
+    )
+}
