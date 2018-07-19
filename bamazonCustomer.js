@@ -1,4 +1,5 @@
 // require node packages
+require('dotenv').config()
 var mysql = require('mysql');
 var inquirer = require('inquirer');
 var Table = require('cli-table');
@@ -9,13 +10,16 @@ var quantityToBuy = 0;
 
 // connection to MySql database
 var connection = mysql.createConnection({
-    host: 'localhost',
+    // get host from .env
+    host: process.env.DB_HOST,
+    // use port 3306
     port: 3306,
 
-    // enter your username and password
-    user: '****',
-    password: '****',
+    // get username and password from .env
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
 
+    // connect to database
     database: 'bamazonDB'
 });
 
@@ -30,10 +34,14 @@ connection.connect(function (err) {
 
 // function to show list of available products to purchase
 function showProductList() {
-    console.log('Here is the current list of items available for purchase: ');
+    console.log('*******************');
+    console.log('\nHere is the current list of items available for purchase: ');
+    // create new table
     var table = new Table({
         head: ['Item ID', 'Product Name', 'Price', 'Quantity']
     });
+
+    // get product info from bamazon DB, products table
     connection.query("SELECT * FROM products", function (err, res) {
         for (var i = 0; i < res.length; i++) {
             table.push(
@@ -41,6 +49,7 @@ function showProductList() {
             );
         }
         console.log(table.toString());
+        // call whatToBuy function
         whatToBuy();
     })
 };
@@ -75,22 +84,27 @@ function whatToBuy() {
     ]).then(function (user) {
         itemToBuy = user.itemID;
         quantityToBuy = parseInt(user.quantityToBuy);
+        // after user input is entered, call checkIfAvailable function
         checkIfAvailable();
     });
 };
 
 // function to check if sufficient quantity of item
 function checkIfAvailable() {
+    // query bamazon DB for the entered item and available quantity
     connection.query("SELECT stock_quantity, product_name, price FROM products WHERE item_id=?", [itemToBuy], function (err, res) {
         if (err) throw err;
+        // if quantity entered is higher than quantity available, alert user there is insufficient stock then call showProductList function to start over
         else if (quantityToBuy > parseInt(res[0].stock_quantity)) {
             console.log("Insufficient stock!");
             console.log('\n*******************');
             showProductList();
         } else {
+            // if quantity entered is equal or lower than quantity available, alert user of the purchase and total cost
             console.log("Ok, you just purchased " + quantityToBuy + " " + res[0].product_name);
             console.log("The total cost was: $" + (quantityToBuy * res[0].price));
             console.log('\n*******************');
+            // call update Quantity function
             updateQuantity();
         }
     });
@@ -108,6 +122,7 @@ function updateQuantity() {
             updateProductSale();
         })
 };
+
 // function update product sales
 function updateProductSale() {
     connection.query("SELECT price, item_id FROM products WHERE item_id =?", [itemToBuy], function (err, res) {
