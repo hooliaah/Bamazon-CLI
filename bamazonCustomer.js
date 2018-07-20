@@ -54,7 +54,7 @@ function showProductList() {
     })
 };
 
-// function to ask the user what and how much they would like to purchase
+// function to ask the user what they would like to purchase
 function whatToBuy() {
     inquirer.prompt([
         {
@@ -68,7 +68,37 @@ function whatToBuy() {
                     return true;
                 }
             }
-        },
+        }
+    ]).then(function (user) {
+        itemToBuy = user.itemID;
+        // after user input is entered, call checkIfItem function
+        checkIfItem();
+    });
+};
+
+// function to check if valid item #
+function checkIfItem() {
+    // query bamazon DB for the entered item
+    connection.query("SELECT item_id FROM products WHERE item_id=?", [itemToBuy], function (err, res) {
+        if (err) throw err;
+        // if itemToBuy exists in the databse, call howManyToBuy function
+        else if (res[0].item_id == itemToBuy) {
+            console.log(res);
+            // call update Quantity function
+            howManyToBuy();
+        }
+        // if item does not exist in database, ask user to enter valid ID and go back to product list
+        else {
+            console.log("Please enter a valid item ID!");
+            console.log('\n*******************');
+            showProductList();
+        }
+    });
+}
+
+// function to ask the user how much they would like to purchase
+function howManyToBuy() {
+    inquirer.prompt([
         {
             type: "input",
             name: "quantityToBuy",
@@ -82,7 +112,6 @@ function whatToBuy() {
             }
         }
     ]).then(function (user) {
-        itemToBuy = user.itemID;
         quantityToBuy = parseInt(user.quantityToBuy);
         // after user input is entered, call checkIfAvailable function
         checkIfAvailable();
@@ -123,10 +152,12 @@ function updateQuantity() {
         })
 };
 
-// function update product sales
+// function to update product sales
 function updateProductSale() {
+    // select the item in database
     connection.query("SELECT price, item_id FROM products WHERE item_id =?", [itemToBuy], function (err, res) {
         if (err) throw err;
+        // update sales of item in database
         connection.query("UPDATE products SET product_sales=product_sales + ? WHERE item_id=?",
             [
                 (parseFloat(res[0].price) * quantityToBuy),
