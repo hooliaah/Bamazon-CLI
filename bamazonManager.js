@@ -1,17 +1,21 @@
 // require node packages
+require('dotenv').config()
 var mysql = require('mysql');
 var inquirer = require('inquirer');
 var Table = require('cli-table');
 
 // connection to MySql database
 var connection = mysql.createConnection({
-    host: 'localhost',
+    // get host from .env
+    host: process.env.DB_HOST,
+    // use port 3306
     port: 3306,
 
-    // enter your username and password
-    user: '********',
-    password: '********',
+    // get username and password from .env
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
 
+    // connect to database
     database: 'bamazonDB'
 });
 
@@ -57,12 +61,13 @@ function viewProducts() {
         head: ['Item ID', 'Product Name', 'Price', 'Quantity']
     });
     connection.query("SELECT * FROM products", function (err, res) {
-        for (var i = 0; i < res.length; i++) {
+        for (let i = 0; i < res.length; i++) {
             table.push(
                 [res[i].item_id, res[i].product_name, res[i].price, res[i].stock_quantity]
             );
         }
         console.log(table.toString());
+        console.log('\n*******************');
         managerOptions();
     })
 };
@@ -71,15 +76,16 @@ function viewProducts() {
 function lowinventory() {
     console.log("Low inventory items: ");
     var tableLow = new Table({
-        head: ['Product Name', 'Quantity']
+        head: ['Item ID', 'Product Name', 'Quantity']
     });
-    connection.query("SELECT product_name, stock_quantity FROM products WHERE stock_quantity <= 5", function (err, res) {
-        for (var j = 0; j < res.length; j++) {
+    connection.query("SELECT item_id, product_name, stock_quantity FROM products WHERE stock_quantity <= 5", function (err, res) {
+        for (let j = 0; j < res.length; j++) {
             tableLow.push(
-                [res[j].product_name, res[j].stock_quantity]
+                [res[j].item_id, res[j].product_name, res[j].stock_quantity]
             );
         }
         console.log(tableLow.toString());
+        console.log('\n*******************');
         managerOptions();
     })
 };
