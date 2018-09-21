@@ -83,7 +83,6 @@ function checkIfItem() {
         if (err) throw err;
         // if itemToBuy exists in the databse, call howManyToBuy function
         else if (res[0].item_id == itemToBuy) {
-            console.log(res);
             // call update Quantity function
             howManyToBuy();
         }

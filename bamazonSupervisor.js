@@ -1,16 +1,17 @@
 // require node packages
+require('dotenv').config() 
 var mysql = require('mysql');
 var inquirer = require('inquirer');
 var Table = require('cli-table');
 
 // connection to MySql database
 var connection = mysql.createConnection({
-    host: 'localhost',
+    host: process.env.DB_HOST,
     port: 3306,
 
-    // enter your username and password
-    user: '****',
-    password: '****',
+    // get username and password from .env
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
 
     database: 'bamazonDB'
 });
