@@ -62,6 +62,8 @@ function viewDeptSales() {
         if (err) throw err;
     // display table with results
     console.log(table.toString());
+    console.log('\n*******************');
+    supervisorOptions();
     })
 };
 
@@ -87,6 +89,7 @@ function createDepartment() {
                 if (err) throw err;
                 console.log(supervisor.departmentNew + " has been added to the department list");
                 console.log('\n*******************');
+                supervisorOptions();
             })
     });
 }
